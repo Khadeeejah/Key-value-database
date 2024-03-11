@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::path::Path;
 use std::{collections::HashMap, error};
 
 fn main() {
@@ -8,8 +10,13 @@ fn main() {
 
     println!("The key is '{}' and the value is '{}'", key, value);
 
-    let contents = format!("{}\t{}", key, value);
-    std::fs::write("kv.dv", contents).unwrap();
+    // let contents = format!("{}\t{}", key, value);
+    // std::fs::write("kv.dv", contents).unwrap();
+
+    // check if the file exist and if it doesnt create a new file and write to it
+    if !Path::new("./kv.dv").is_file() {
+        File::create("kv.dv").unwrap();
+    }
 
     // create our database
     let database = Database::new().expect("creating database failed");
@@ -23,13 +30,6 @@ struct Database {
 
 impl Database {
     fn new() -> Result<Database, std::io::Error> {
-        // read the kv.db file
-        // let contents = match std::fs::read_to_string("kv.dv") {
-        //     Ok(c) => c,
-        //     Err(error) => {
-        //         return Err(error);
-        //     }
-        // };
         let mut map = HashMap::new();
         // instead of writing the above you can rewrite it like this below
         let contents = std::fs::read_to_string("kv.dv")?;
