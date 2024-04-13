@@ -1,6 +1,6 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
-use std::{collections::HashMap, error};
 
 fn main() {
     let mut arguments = std::env::args().skip(1);
@@ -19,7 +19,10 @@ fn main() {
     }
 
     // create our database
-    let database = Database::new().expect("creating database failed");
+    let mut database = Database::new().expect("creating database failed");
+    database.insert(key.to_uppercase(), value.clone());
+    database.insert(key, value);
+    database.flush().unwrap();
 }
 
 // file will look like this.
@@ -42,5 +45,18 @@ impl Database {
         // parse the string
         // populate our map
         Ok(Database { map: map })
+    }
+
+    fn insert(&mut self, key: String, value: String) {
+        self.map.insert(key, value);
+    }
+
+    fn flush(self) -> std::io::Result<()> {
+        let mut contents = String::new();
+        for pairs in self.map {
+            let kvpair = format!("{}\t{}\n", pairs.0, pairs.1);
+            contents.push_str(&kvpair);
+        }
+        std::fs::write("kv.dv", contents)
     }
 }
